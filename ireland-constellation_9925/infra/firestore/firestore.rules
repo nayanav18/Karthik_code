@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Note: these rules are a backstop for direct Firestore access (e.g. the
+// realtime comment listeners in React). The FastAPI backend re-checks ACLs
+// server-side on every request regardless — never trust the client alone.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasAclAccess(resourceData, role) {
+      return isSignedIn() && resourceData.acl.hasAny([
+        { 'principal': request.auth.uid, 'role': role },
+        { 'principal': request.auth.uid, 'role': 'owner' }
+      ]);
+    }
+
+    match /folders/{folderId} {
+      allow read: if hasAclAccess(resource.data, 'viewer') || hasAclAccess(resource.data, 'editor');
+      allow write: if hasAclAccess(resource.data, 'editor');
+    }
+
+    match /dashboards/{dashboardId} {
+      allow read: if hasAclAccess(resource.data, 'viewer') || hasAclAccess(resource.data, 'editor');
+      allow write: if hasAclAccess(resource.data, 'editor');
+
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.author == request.auth.uid;
+        allow update, delete: if isSignedIn() && resource.data.author == request.auth.uid;
+      }
+    }
+  }
+}
