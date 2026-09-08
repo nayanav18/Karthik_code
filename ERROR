@@ -1,0 +1,10 @@
+INFO:     Started server process [6399]
+INFO:     Waiting for application startup.
+/usr/local/lib/python3.12/dist-packages/vertexai/generative_models/_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+2026-09-08 03:01:17 [info     ] Starting Vodafone Ireland Analytics v2.0
+2026-09-08 03:01:21 [info     ] Memory tables ready           
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
