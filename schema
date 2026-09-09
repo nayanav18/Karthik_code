@@ -230,3 +230,30 @@ class ClarificationResponse(BaseModel):
     matching_columns: List[ColumnOption] = []
     original_query: str = ""
     suggested_reformulations: List[str] = []
+
+
+
+
+# ── Dashboard Version History ─────────────────────────────────────────────
+
+class SaveVersionRequest(BaseModel):
+    conversation_id: str = ""
+    query: str = ""
+    analytics: Optional[dict] = {}
+    dataset_id: str = "ireland"
+    version_name: Optional[str] = ""
+    user_id: Optional[str] = None
+
+
+class DashboardVersion(BaseModel):
+    id: str = ""
+    conversation_id: str = ""
+    version_name: str = ""
+    query: str = ""
+    dataset_id: str = ""
+    analytics: Optional[dict] = {}
+    created_at: Optional[datetime] = None
+
+
+class VersionHistoryResponse(BaseModel):
+    versions: List[DashboardVersion] = []
