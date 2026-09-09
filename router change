@@ -22,5 +22,19 @@ try:
 
     schema = "\n\n".join(schema_lines)
 
+
+
+
+
+
+
+
+
+logger.info(
+    "Dashboard schema prepared",
+    schema_length=len(schema),
+    schema_preview=schema[:500]
+)
+
 except Exception as e:
     logger.warning("Schema discovery failed", error=str(e)[:80])
