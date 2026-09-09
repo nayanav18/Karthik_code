@@ -1,0 +1,342 @@
+"""
+Dashboard Analyst Agent — auto-generates a persona-driven dashboard.
+
+For each persona it:
+1. Reads the persona's dashboard_layers config
+2. Builds targeted SQL queries for each chart
+3. Executes them against BigQuery in parallel
+4. Selects the best chart type for each result
+5. Generates a Story Agent narrative
+6. Returns a complete DashboardResponse
+"""
+import asyncio
+import json
+import time
+import structlog
+import vertexai
+from vertexai.generative_models import GenerativeModel, GenerationConfig
+
+from services.persona_service import get_persona, get_dashboard_config
+from services.bigquery_service import run_query
+from services.chart_selector import select_chart_type
+from agents.story_agent import StoryAgent
+from config import settings
+
+logger = structlog.get_logger()
+
+
+# ── SQL generation prompt ──────────────────────────────────────────────────
+DASHBOARD_SQL_PROMPT = """You are a BigQuery SQL expert building a persona dashboard.
+
+PERSONA: {persona_name}
+PERSONA FOCUS: {focus}
+CHART NEEDED: {chart_title}
+CHART TYPE: {chart_type}
+DIMENSION TO USE: {dimension}
+METRIC TO USE: {metric}
+DATE PERIOD: {period}
+
+AVAILABLE SCHEMA:
+{schema}
+
+Generate ONE SQL query that:
+1. Returns data suitable for a {chart_type} chart
+2. Uses the {dimension} column for grouping where applicable
+3. Filters to {period} if date column available
+4. Returns max 12 rows (LIMIT 12)
+5. For trend/line charts: include date column + metric, ORDER BY date ASC, LIMIT 6
+6. For bar/donut: GROUP BY dimension, aggregate metric, ORDER BY metric DESC
+7. For waterfall: include INFLOW and OUTFLOW separately
+
+Return ONLY the SQL string. No explanation, no markdown."""
+
+
+class DashboardAnalystAgent:
+    """Builds a complete persona-driven dashboard from BigQuery data."""
+
+    def __init__(self):
+        self.model = None
+
+    def _init_model(self):
+        if not self.model:
+            vertexai.init(
+                project=settings.GCP_PROJECT_ID,
+                location=settings.GCP_LOCATION
+            )
+            self.model = GenerativeModel(model_name=settings.VERTEX_AI_MODEL)
+
+    async def generate_sql(self, chart_config: dict, schema: str,
+                            persona: dict, period: str) -> str:
+        """Generate SQL for one chart using Gemini."""
+        self._init_model()
+        focus = ", ".join(persona.get("focus", []))
+        prompt = DASHBOARD_SQL_PROMPT.format(
+            persona_name=persona.get("name", "Analyst"),
+            focus=focus,
+            chart_title=chart_config.get("title", ""),
+            chart_type=chart_config.get("type", "bar"),
+            dimension=chart_config.get("dimension", "Channel"),
+            metric=chart_config.get("metric", "Subscriber_Count_CM"),
+            period=period,
+            schema=schema[:1500],
+        )
+        try:
+            resp = await self.model.generate_content_async(
+                prompt,
+                generation_config=GenerationConfig(temperature=0.1, max_output_tokens=512),
+            )
+            sql = resp.text.strip().replace("```sql", "").replace("```", "").strip()
+            return sql
+        except Exception as e:
+            logger.warning("SQL gen failed for chart", title=chart_config.get("title"), error=str(e))
+            return ""
+
+    async def build_chart(self, chart_config: dict, schema: str,
+                           persona: dict, period: str) -> dict:
+        """Build one chart: generate SQL → execute BQ → select chart type."""
+        sql = await self.generate_sql(chart_config, schema, persona, period)
+        if not sql:
+            return {"title": chart_config["title"], "error": "SQL generation failed",
+                    "type": chart_config.get("type", "bar"), "data": []}
+        try:
+            rows = await run_query(sql)
+            # Select best chart type based on query + data
+            final_type = select_chart_type(
+                query=chart_config.get("title", ""),
+                rows=rows,
+                requested_type=chart_config.get("type"),
+            )
+            return {
+                "title": chart_config["title"],
+                "type": final_type,
+                "sql": sql,
+                "rows": rows,
+                "row_count": len(rows),
+                "data": _rows_to_chart_data(rows, final_type),
+            }
+        except Exception as e:
+            logger.warning("BQ chart query failed", title=chart_config.get("title"), error=str(e))
+            return {"title": chart_config["title"], "error": str(e),
+                    "type": chart_config.get("type", "bar"), "data": []}
+
+    async def build_kpi_scoreboard(self, persona: dict, schema: str,
+                                    period: str) -> list:
+        """Build KPI scoreboard based on persona default_kpis config."""
+        kpis = persona.get("default_kpis", [])
+        results = []
+        for kpi in kpis:
+            hint = kpi.get("column_hint", "")
+            # Find matching column in schema
+            col = _find_column(schema, hint)
+            if not col:
+                results.append({
+                    "label": kpi["label"], "value": "N/A",
+                    "change": "No data", "trend": "neutral",
+                    "format": kpi.get("format", "number"),
+                })
+                continue
+            # Build simple aggregation SQL
+            sql = _build_kpi_sql(col, period, schema)
+            if not sql:
+                continue
+            try:
+                rows = await run_query(sql)
+                if rows:
+                    val = list(rows[0].values())[-1]
+                    # Get previous period for variance
+                    prev_sql = _build_prev_kpi_sql(col, period, schema)
+                    prev_rows = await run_query(prev_sql) if prev_sql else []
+                    prev_val = list(prev_rows[0].values())[-1] if prev_rows else None
+                    change, trend = _calc_variance(val, prev_val)
+                    results.append({
+                        "label": kpi["label"],
+                        "value": _format_val(val, kpi.get("format", "number")),
+                        "change": change,
+                        "trend": trend,
+                        "format": kpi.get("format", "number"),
+                        "raw_value": float(val) if val else 0,
+                    })
+            except Exception as e:
+                logger.warning("KPI query failed", label=kpi["label"], error=str(e))
+                results.append({"label": kpi["label"], "value": "N/A",
+                                 "change": "—", "trend": "neutral"})
+        return results
+
+    async def run(self, persona_id: str, schema: str,
+                  period: str = "latest") -> dict:
+        """
+        Main entry: builds the full persona dashboard.
+        Returns DashboardResponse dict.
+        """
+        start = time.monotonic()
+        persona = get_persona(persona_id)
+        dash_config = get_dashboard_config(persona_id)
+        layers = dash_config.get("dashboard_layers", [])
+
+        logger.info("Building persona dashboard",
+                    persona=persona_id, layers=len(layers))
+
+        # 1. Build KPI scoreboard
+        kpis_task = asyncio.create_task(
+            self.build_kpi_scoreboard(persona, schema, period)
+        )
+
+        # 2. Build all charts in parallel across all layers
+        all_chart_tasks = []
+        chart_meta = []   # track which layer each chart belongs to
+        for layer in layers:
+            for chart_cfg in layer.get("charts", []):
+                task = asyncio.create_task(
+                    self.build_chart(chart_cfg, schema, persona, period)
+                )
+                all_chart_tasks.append(task)
+                chart_meta.append({
+                    "layer_id": layer["id"],
+                    "layer_label": layer["label"],
+                    "layer_icon": layer.get("icon", "📊"),
+                })
+
+        # Wait for all in parallel
+        kpi_results, *chart_results = await asyncio.gather(
+            kpis_task, *all_chart_tasks
+        )
+
+        # 3. Organise charts back into layers
+        built_layers = {}
+        for meta, result in zip(chart_meta, chart_results):
+            lid = meta["layer_id"]
+            if lid not in built_layers:
+                built_layers[lid] = {
+                    "id": lid,
+                    "label": meta["layer_label"],
+                    "icon": meta["layer_icon"],
+                    "charts": [],
+                }
+            built_layers[lid]["charts"].append(result)
+
+        # 4. Generate story narrative
+        story = await StoryAgent().generate(
+            persona=persona,
+            kpis=kpi_results,
+            charts=chart_results,
+            period=period,
+        )
+
+        duration_ms = int((time.monotonic() - start) * 1000)
+        logger.info("Dashboard built",
+                    persona=persona_id,
+                    kpis=len(kpi_results),
+                    charts=len(chart_results),
+                    layers=len(built_layers),
+                    duration_ms=duration_ms)
+
+        return {
+            "persona_id": persona_id,
+            "persona_name": persona.get("name"),
+            "persona_icon": persona.get("icon"),
+            "tagline": persona.get("tagline"),
+            "period": period,
+            "kpis": kpi_results,
+            "layers": list(built_layers.values()),
+            "story": story,
+            "suggested_questions": persona.get("suggested_questions", []),
+            "generated_at": time.time(),
+            "duration_ms": duration_ms,
+        }
+
+
+# ── Helper functions ──────────────────────────────────────────────────────
+
+def _find_column(schema: str, hint: str) -> str:
+    """Find the best matching column in schema for a hint."""
+    if not hint or not schema:
+        return ""
+    hint_lower = hint.lower()
+    lines = schema.lower().split("\n")
+    for line in lines:
+        if hint_lower in line:
+            # Extract column name
+            parts = line.strip().split()
+            if parts:
+                return parts[0].strip("`")
+    return ""
+
+
+def _build_kpi_sql(col: str, period: str, schema: str) -> str:
+    """Build a simple aggregation SQL for a KPI column."""
+    # Find table name from schema
+    table = _extract_table(schema)
+    if not table:
+        return ""
+    return f"SELECT SUM(`{col}`) as value FROM `{table}` LIMIT 1"
+
+
+def _build_prev_kpi_sql(col: str, period: str, schema: str) -> str:
+    """Build previous period SQL for variance."""
+    table = _extract_table(schema)
+    if not table:
+        return ""
+    return f"SELECT SUM(`{col}`) as value FROM `{table}` LIMIT 1"
+
+
+def _extract_table(schema: str) -> str:
+    """Extract first table name from schema string."""
+    for line in schema.split("\n"):
+        if "Table:" in line:
+            parts = line.split("Table:")
+            if len(parts) > 1:
+                return parts[1].strip()
+    return ""
+
+
+def _calc_variance(current, previous) -> tuple:
+    """Calculate variance string and trend direction."""
+    try:
+        c = float(current or 0)
+        p = float(previous or 0)
+        if p == 0:
+            return "N/A", "neutral"
+        diff = c - p
+        pct = (diff / p) * 100
+        sign = "+" if diff >= 0 else ""
+        trend = "up" if diff > 0 else ("down" if diff < 0 else "neutral")
+        return f"{sign}{diff:,.0f} / {sign}{pct:.1f}%", trend
+    except Exception:
+        return "N/A", "neutral"
+
+
+def _format_val(val, fmt: str) -> str:
+    """Format a value for display based on format type."""
+    try:
+        v = float(val)
+        if fmt == "number":
+            return f"{v:,.0f}"
+        elif fmt == "currency_eur":
+            return f"€{v:,.2f}"
+        elif fmt == "percent":
+            return f"{v:.1f}%"
+        elif fmt == "number_signed":
+            return f"+{v:,.0f}" if v >= 0 else f"{v:,.0f}"
+        return str(val)
+    except Exception:
+        return str(val)
+
+
+def _rows_to_chart_data(rows: list, chart_type: str) -> list:
+    """Convert BQ rows to chart data format."""
+    if not rows:
+        return []
+    data = []
+    for row in rows[:12]:
+        vals = list(row.values())
+        if len(vals) >= 2:
+            data.append({
+                "label": str(vals[0]),
+                "value": float(vals[1]) if vals[1] is not None else 0,
+            })
+        elif len(vals) == 1:
+            data.append({
+                "label": str(list(row.keys())[0]),
+                "value": float(vals[0]) if vals[0] is not None else 0,
+            })
+    return data
