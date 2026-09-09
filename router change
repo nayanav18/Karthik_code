@@ -1,0 +1,26 @@
+# Get schema
+schema = ""
+try:
+    meta = MetadataAgent()
+    ctx = await meta.run({
+        "dataset_id": dataset_id,
+        "query": f"dashboard for {persona_id}",
+    })
+
+    metadata = ctx.get("metadata", {})
+    tables = metadata.get("tables", {})
+
+    schema_lines = []
+
+    for table_name, info in tables.items():
+        schema_lines.append(
+            f"Table: {info['full_name']}\n"
+            f"  Numeric (metrics): {info.get('numeric_columns', [])}\n"
+            f"  Date columns: {info.get('date_columns', [])}\n"
+            f"  String (dimensions): {info.get('string_columns', [])}"
+        )
+
+    schema = "\n\n".join(schema_lines)
+
+except Exception as e:
+    logger.warning("Schema discovery failed", error=str(e)[:80])
