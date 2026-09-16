@@ -1,0 +1,166 @@
+Welcome to Cloud Shell! Type "help" to get started.
+To set your Cloud Platform project in this session use `gcloud config set project [PROJECT_ID]`.
+You can view your projects by running `gcloud projects list`.
+nayana_v1@cloudshell:~/phase2_updated$ cd enterprise-analytics-phase2/
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2$ cd backend
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ cd enterprise-analytics-p
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ cd enterprise-analytics-
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ cd enterprise-analytics-
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ cd enterprise-analytics-
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ cd enterprise-analytics-
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ cd enterprise-analytics-
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ cd enterprise-analytics-
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ uvicorn main:app --reload --host 0.0.0.0 --port 8000
+INFO:     Will watch for changes in these directories: ['/home/nayana_v1/phase2_updated/enterprise-analytics-phase2/backend']
+ERROR:    [Errno 98] Address already in use
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ lsof -i :8000
+bash: lsof: command not found
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ fuser -k 8000/tcp
+8000/tcp:             4685  4687
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ kill 4685
+bash: kill: (4685) - No such process
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ fuser 8000/tcp
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ uvicorn main:app --reload --host 0.0.0.0 --port 8000
+INFO:     Will watch for changes in these directories: ['/home/nayana_v1/phase2_updated/enterprise-analytics-phase2/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [8867] using StatReload
+2026-09-16 08:15:03 [info     ] Vertex AI initialised          model=gemini-2.5-flash-lite
+INFO:     Started server process [8869]
+INFO:     Waiting for application startup.
+/usr/local/lib/python3.12/dist-packages/vertexai/generative_models/_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+2026-09-16 08:15:10 [info     ] Memory tables ready           
+INFO:     Application startup complete.
+INFO:     127.0.0.1:37558 - "GET /api/v1/conversations?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37572 - "GET /api/v1/insights?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37574 - "GET /api/v1/conversations?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+2026-09-16 08:15:56 [info     ] Chat request                   conversation_id=b0a69455-44cd-44d8-b111-d55f4f5c4904 persona_id=analyst query='Show subscriber count for May 2026' user_id=a3065e0b-d567-4a01-846c-f1008e82f824
+2026-09-16 08:15:59 [debug    ] Guardrail passed               query='Show subscriber count for May 2026'
+2026-09-16 08:16:05 [info     ] Conversation created           conversation_id=b0a69455-44cd-44d8-b111-d55f4f5c4904 user_id=a3065e0b-d567-4a01-846c-f1008e82f824
+2026-09-16 08:16:07 [info     ] Agent starting                 agent=planner
+INFO:     127.0.0.1:37598 - "GET /api/v1/conversations/b0a69455-44cd-44d8-b111-d55f4f5c4904/messages?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37610 - "GET /api/v1/insights?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+2026-09-16 08:16:10 [info     ] Agent complete                 agent=planner duration_ms=3429
+2026-09-16 08:16:10 [info     ] Agent starting                 agent=metadata
+2026-09-16 08:16:10 [info     ] Discovering schema from BigQuery dataset=KarthikRudrapati
+2026-09-16 08:16:11 [info     ] Discovered tables              count=7 dataset=KarthikRudrapati
+2026-09-16 08:16:11 [info     ] Table schema discovered        dates=['created_at', 'updated_at'] numeric=['message_count'] strings=['conversation_id', 'user_id', 'persona_id', 'dataset_id', 'title'] table=analytics_conversations
+2026-09-16 08:16:12 [info     ] Table schema discovered        dates=['updated_at'] numeric=[] strings=['layout_id', 'user_id', 'persona_id'] table=analytics_dashboard_layouts
+2026-09-16 08:16:12 [info     ] Table schema discovered        dates=['created_at'] numeric=['confidence'] strings=['insight_id', 'user_id', 'persona_id', 'dataset_id', 'title', 'query', 'tags'] table=analytics_insights
+2026-09-16 08:16:13 [info     ] Table schema discovered        dates=['timestamp'] numeric=['sql_row_count', 'execution_time_ms'] strings=['log_id', 'user_session', 'dataset_id', 'user_query', 'generated_sql', 'what_happened', 'status', 'error_message'] table=analytics_logs
+2026-09-16 08:16:13 [info     ] Table schema discovered        dates=['generated_at'] numeric=[] strings=['message_id', 'conversation_id', 'user_id', 'role', 'query'] table=analytics_messages
+2026-09-16 08:16:13 [info     ] Table schema discovered        dates=['created_at', 'last_active'] numeric=[] strings=['user_id', 'persona_id', 'display_name'] table=analytics_users
+2026-09-16 08:16:14 [info     ] Table schema discovered        dates=['Reporting_Date_Filter'] numeric=['Customer_Revenue__CLTV___A_', 'Channel_Profitability_Incoming_Revenue_CM', 'Total_Revenue_SAC_CM', 'Direct_Costs', 'Channel_Profitability_Fixedline_Cost_CM', 'Channel_Profitability_Interconnect_Cost_CM', 'Channel_Profitability_Content_Cost_CM', 'Total_Direct_Cost__C_', 'Direct_Cost_Margin__A_B__C', 'Direct_Cost_Margin__SAC', 'Indirect_Costs', 'Channel_Profitability_Equipment_Subsidy_Q_CM', 'Channel_Profitability_Commissions_Cost_CM', 'Log_Debt_Sale_Cost_CM', 'Bad_Debt_CM', 'Channel_Profitability_Opex_Rent_CM', 'Channel_Profitability_Opex_FTE_CM', 'Channel_Profitability_Opex_Others_CM', 'Channel_Profitability_Opex_Digital_CM', 'Channel_Profitability_Opex_Care_CM', 'Total_Indirect_Cost__D_', 'Total_Cost__C__D_', 'Channel_Cost_CM', 'ROI_SAC_CM', 'Subscriber_Count_CM'] strings=['Channel_Group', 'Customer_Subscriber_Type_Description_Q', 'Price_Plan', 'Transaction_Type', 'Sub_Bill_Type_Extended_Code', 'Convergence_Type'] table=cp
+2026-09-16 08:16:14 [info     ] Schema discovery complete      dimensions=['conversation_id', 'user_id', 'persona_id', 'dataset_id', 'title', 'created_at', 'updated_at', 'layout_id', 'user_id', 'persona_id', 'updated_at', 'insight_id', 'user_id', 'persona_id', 'dataset_id', 'title', 'query', 'tags', 'created_at', 'log_id', 'timestamp', 'user_session', 'dataset_id', 'user_query', 'generated_sql', 'what_happened', 'status', 'error_message', 'message_id', 'conversation_id', 'user_id', 'role', 'query', 'generated_at', 'user_id', 'persona_id', 'display_name', 'created_at', 'last_active', 'Reporting_Date_Filter', 'Channel_Group', 'Customer_Subscriber_Type_Description_Q', 'Price_Plan', 'Transaction_Type', 'Sub_Bill_Type_Extended_Code', 'Convergence_Type'] metrics=['message_count', 'confidence', 'sql_row_count', 'execution_time_ms', 'Customer_Revenue__CLTV___A_', 'Channel_Profitability_Incoming_Revenue_CM', 'Total_Revenue_SAC_CM', 'Direct_Costs', 'Channel_Profitability_Fixedline_Cost_CM', 'Channel_Profitability_Interconnect_Cost_CM', 'Channel_Profitability_Content_Cost_CM', 'Total_Direct_Cost__C_', 'Direct_Cost_Margin__A_B__C', 'Direct_Cost_Margin__SAC', 'Indirect_Costs', 'Channel_Profitability_Equipment_Subsidy_Q_CM', 'Channel_Profitability_Commissions_Cost_CM', 'Log_Debt_Sale_Cost_CM', 'Bad_Debt_CM', 'Channel_Profitability_Opex_Rent_CM', 'Channel_Profitability_Opex_FTE_CM', 'Channel_Profitability_Opex_Others_CM', 'Channel_Profitability_Opex_Digital_CM', 'Channel_Profitability_Opex_Care_CM', 'Total_Indirect_Cost__D_', 'Total_Cost__C__D_', 'Channel_Cost_CM', 'ROI_SAC_CM', 'Subscriber_Count_CM'] tables=['analytics_conversations', 'analytics_dashboard_layouts', 'analytics_insights', 'analytics_logs', 'analytics_messages', 'analytics_users', 'cp']
+2026-09-16 08:16:14 [info     ] Agent complete                 agent=metadata duration_ms=3434
+2026-09-16 08:16:14 [info     ] Agent starting                 agent=data
+2026-09-16 08:16:14 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:16:15 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:16:15 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:16:16 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:16:16 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:16:17 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:16:17 [info     ] Running BigQuery query         sql_preview="SELECT FORMAT_DATE('%Y-%m', DATE_TRUNC(`Reporting_Date_Filter`, MONTH)) AS label, MAX(`Subscriber_Count_CM`) AS value FR"
+2026-09-16 08:16:18 [error    ] BigQuery error                 error='400 SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]; reason: invalidQuery, location: query, message: SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]\n\nLocation: US\nJob ID: 7e48bb49-50de-4c7a-ac5a-ba44566c940f\n' sql="SELECT FORMAT_DATE('%Y-%m', DATE_TRUNC(`Reporting_Date_Filter`, MONTH)) AS label, MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` GROUP BY DATE_TRUNC(`Reporting_Da"
+2026-09-16 08:16:18 [error    ] BigQuery query failed          error='400 SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]; reason: invalidQuery, location: query, mes' query_type=trend
+2026-09-16 08:16:18 [info     ] Data agent complete            chart_source=current_period current_rows=1 dimension_rows=1 trend_rows=0
+2026-09-16 08:16:18 [info     ] Agent complete                 agent=data duration_ms=3967
+2026-09-16 08:16:18 [info     ] Personas loaded from YAML      count=5
+/usr/local/lib/python3.12/dist-packages/vertexai/generative_models/_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+2026-09-16 08:16:21 [info     ] Analytics complete             chart_type=kpi_card kpis=3 persona=analyst
+2026-09-16 08:16:21 [info     ] GENERATED SQL                  row_count=1 sql="SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter` >= DATE '2026-05-01' AND `Reporting_Date_Filter` < DATE '2026-06-01'"
+2026-09-16 08:16:22 [info     ] Request logged to BQ           log_id=1c7c4056-b360-4f91-b2bc-52836964db54 query='Show subscriber count for May 2026'
+2026-09-16 08:16:22 [error    ] Market analysis parse error    error='models.schemas.MarketAnalysis() argument after ** must be a mapping, not list'
+2026-09-16 08:16:22 [error    ] Competitor analysis parse error error="'list' object has no attribute 'get'"
+2026-09-16 08:16:22 [info     ] Pipeline complete              bullets=3 duration_ms=14164 kpis=3 query='Show subscriber count for May 2026' questions=5
+INFO:     127.0.0.1:37590 - "POST /api/v1/chat HTTP/1.1" 200 OK
+^CINFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [8869]
+INFO:     Stopping reloader process [8867]
+nayana_v1@cloudshell:~/phase2_updated/enterprise-analytics-phase2/backend$ uvicorn main:app --reload --host 0.0.0.0 --port 8000
+INFO:     Will watch for changes in these directories: ['/home/nayana_v1/phase2_updated/enterprise-analytics-phase2/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [9711] using StatReload
+2026-09-16 08:17:07 [info     ] Vertex AI initialised          model=gemini-2.5-flash-lite
+INFO:     Started server process [9713]
+INFO:     Waiting for application startup.
+/usr/local/lib/python3.12/dist-packages/vertexai/generative_models/_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+2026-09-16 08:17:12 [info     ] Memory tables ready           
+INFO:     Application startup complete.
+INFO:     127.0.0.1:39980 - "GET /api/v1/conversations?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39990 - "GET /api/v1/insights?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40006 - "GET /api/v1/conversations?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40010 - "GET /api/v1/conversations/b0a69455-44cd-44d8-b111-d55f4f5c4904/messages?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40022 - "GET /api/v1/insights?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+2026-09-16 08:17:38 [info     ] Chat request                   conversation_id=b0a69455-44cd-44d8-b111-d55f4f5c4904 persona_id=analyst query='Show subscriber count for May 2026' user_id=a3065e0b-d567-4a01-846c-f1008e82f824
+2026-09-16 08:17:40 [debug    ] Guardrail passed               query='Show subscriber count for May 2026'
+2026-09-16 08:17:44 [info     ] Agent starting                 agent=planner
+INFO:     127.0.0.1:40040 - "GET /api/v1/conversations/b0a69455-44cd-44d8-b111-d55f4f5c4904/messages?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+2026-09-16 08:17:45 [info     ] Agent complete                 agent=planner duration_ms=1620
+2026-09-16 08:17:45 [info     ] Agent starting                 agent=metadata
+2026-09-16 08:17:45 [info     ] Discovering schema from BigQuery dataset=KarthikRudrapati
+2026-09-16 08:17:46 [info     ] Discovered tables              count=7 dataset=KarthikRudrapati
+2026-09-16 08:17:46 [info     ] Table schema discovered        dates=['created_at', 'updated_at'] numeric=['message_count'] strings=['conversation_id', 'user_id', 'persona_id', 'dataset_id', 'title'] table=analytics_conversations
+2026-09-16 08:17:47 [info     ] Table schema discovered        dates=['updated_at'] numeric=[] strings=['layout_id', 'user_id', 'persona_id'] table=analytics_dashboard_layouts
+2026-09-16 08:17:47 [info     ] Table schema discovered        dates=['created_at'] numeric=['confidence'] strings=['insight_id', 'user_id', 'persona_id', 'dataset_id', 'title', 'query', 'tags'] table=analytics_insights
+2026-09-16 08:17:48 [info     ] Table schema discovered        dates=['timestamp'] numeric=['sql_row_count', 'execution_time_ms'] strings=['log_id', 'user_session', 'dataset_id', 'user_query', 'generated_sql', 'what_happened', 'status', 'error_message'] table=analytics_logs
+2026-09-16 08:17:48 [info     ] Table schema discovered        dates=['generated_at'] numeric=[] strings=['message_id', 'conversation_id', 'user_id', 'role', 'query'] table=analytics_messages
+2026-09-16 08:17:49 [info     ] Table schema discovered        dates=['created_at', 'last_active'] numeric=[] strings=['user_id', 'persona_id', 'display_name'] table=analytics_users
+2026-09-16 08:17:49 [info     ] Table schema discovered        dates=['Reporting_Date_Filter'] numeric=['Customer_Revenue__CLTV___A_', 'Channel_Profitability_Incoming_Revenue_CM', 'Total_Revenue_SAC_CM', 'Direct_Costs', 'Channel_Profitability_Fixedline_Cost_CM', 'Channel_Profitability_Interconnect_Cost_CM', 'Channel_Profitability_Content_Cost_CM', 'Total_Direct_Cost__C_', 'Direct_Cost_Margin__A_B__C', 'Direct_Cost_Margin__SAC', 'Indirect_Costs', 'Channel_Profitability_Equipment_Subsidy_Q_CM', 'Channel_Profitability_Commissions_Cost_CM', 'Log_Debt_Sale_Cost_CM', 'Bad_Debt_CM', 'Channel_Profitability_Opex_Rent_CM', 'Channel_Profitability_Opex_FTE_CM', 'Channel_Profitability_Opex_Others_CM', 'Channel_Profitability_Opex_Digital_CM', 'Channel_Profitability_Opex_Care_CM', 'Total_Indirect_Cost__D_', 'Total_Cost__C__D_', 'Channel_Cost_CM', 'ROI_SAC_CM', 'Subscriber_Count_CM'] strings=['Channel_Group', 'Customer_Subscriber_Type_Description_Q', 'Price_Plan', 'Transaction_Type', 'Sub_Bill_Type_Extended_Code', 'Convergence_Type'] table=cp
+2026-09-16 08:17:49 [info     ] Schema discovery complete      dimensions=['conversation_id', 'user_id', 'persona_id', 'dataset_id', 'title', 'created_at', 'updated_at', 'layout_id', 'user_id', 'persona_id', 'updated_at', 'insight_id', 'user_id', 'persona_id', 'dataset_id', 'title', 'query', 'tags', 'created_at', 'log_id', 'timestamp', 'user_session', 'dataset_id', 'user_query', 'generated_sql', 'what_happened', 'status', 'error_message', 'message_id', 'conversation_id', 'user_id', 'role', 'query', 'generated_at', 'user_id', 'persona_id', 'display_name', 'created_at', 'last_active', 'Reporting_Date_Filter', 'Channel_Group', 'Customer_Subscriber_Type_Description_Q', 'Price_Plan', 'Transaction_Type', 'Sub_Bill_Type_Extended_Code', 'Convergence_Type'] metrics=['message_count', 'confidence', 'sql_row_count', 'execution_time_ms', 'Customer_Revenue__CLTV___A_', 'Channel_Profitability_Incoming_Revenue_CM', 'Total_Revenue_SAC_CM', 'Direct_Costs', 'Channel_Profitability_Fixedline_Cost_CM', 'Channel_Profitability_Interconnect_Cost_CM', 'Channel_Profitability_Content_Cost_CM', 'Total_Direct_Cost__C_', 'Direct_Cost_Margin__A_B__C', 'Direct_Cost_Margin__SAC', 'Indirect_Costs', 'Channel_Profitability_Equipment_Subsidy_Q_CM', 'Channel_Profitability_Commissions_Cost_CM', 'Log_Debt_Sale_Cost_CM', 'Bad_Debt_CM', 'Channel_Profitability_Opex_Rent_CM', 'Channel_Profitability_Opex_FTE_CM', 'Channel_Profitability_Opex_Others_CM', 'Channel_Profitability_Opex_Digital_CM', 'Channel_Profitability_Opex_Care_CM', 'Total_Indirect_Cost__D_', 'Total_Cost__C__D_', 'Channel_Cost_CM', 'ROI_SAC_CM', 'Subscriber_Count_CM'] tables=['analytics_conversations', 'analytics_dashboard_layouts', 'analytics_insights', 'analytics_logs', 'analytics_messages', 'analytics_users', 'cp']
+2026-09-16 08:17:49 [info     ] Agent complete                 agent=metadata duration_ms=3846
+2026-09-16 08:17:49 [info     ] Agent starting                 agent=data
+2026-09-16 08:17:49 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:17:50 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:17:50 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:17:51 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:17:51 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:17:52 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:17:52 [info     ] Running BigQuery query         sql_preview="SELECT FORMAT_DATE('%Y-%m', DATE_TRUNC(`Reporting_Date_Filter`, MONTH)) AS label, MAX(`Subscriber_Count_CM`) AS value FR"
+2026-09-16 08:17:53 [error    ] BigQuery error                 error='400 SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]; reason: invalidQuery, location: query, message: SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]\n\nLocation: US\nJob ID: c361cec5-7a96-471b-91b9-538939df1023\n' sql="SELECT FORMAT_DATE('%Y-%m', DATE_TRUNC(`Reporting_Date_Filter`, MONTH)) AS label, MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` GROUP BY DATE_TRUNC(`Reporting_Da"
+2026-09-16 08:17:53 [error    ] BigQuery query failed          error='400 SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]; reason: invalidQuery, location: query, mes' query_type=trend
+2026-09-16 08:17:53 [info     ] Data agent complete            chart_source=current_period current_rows=1 dimension_rows=1 trend_rows=0
+2026-09-16 08:17:53 [info     ] Agent complete                 agent=data duration_ms=3857
+2026-09-16 08:17:53 [info     ] Personas loaded from YAML      count=5
+/usr/local/lib/python3.12/dist-packages/vertexai/generative_models/_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+INFO:     127.0.0.1:40506 - "GET /api/v1/conversations/b0a69455-44cd-44d8-b111-d55f4f5c4904/messages?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34384 - "GET /api/v1/conversations/fe493f59-c649-4857-be58-b8ed7b55cb36/messages?user_id=a3065e0b-d567-4a01-846c-f1008e82f824 HTTP/1.1" 200 OK
+2026-09-16 08:17:57 [info     ] Analytics complete             chart_type=kpi_card kpis=3 persona=analyst
+2026-09-16 08:17:57 [info     ] GENERATED SQL                  row_count=1 sql="SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter` >= DATE '2026-05-01' AND `Reporting_Date_Filter` < DATE '2026-06-01'"
+2026-09-16 08:17:58 [info     ] Request logged to BQ           log_id=0747b4bf-5e38-4ccc-9f82-b9a38a44d113 query='Show subscriber count for May 2026'
+2026-09-16 08:17:58 [error    ] Market analysis parse error    error='models.schemas.MarketAnalysis() argument after ** must be a mapping, not list'
+2026-09-16 08:17:58 [error    ] Competitor analysis parse error error="'list' object has no attribute 'get'"
+2026-09-16 08:17:58 [info     ] Pipeline complete              bullets=3 duration_ms=13838 kpis=3 query='Show subscriber count for May 2026' questions=5
+INFO:     127.0.0.1:40038 - "POST /api/v1/chat HTTP/1.1" 200 OK
+2026-09-16 08:18:15 [info     ] Chat request                   conversation_id=fe493f59-c649-4857-be58-b8ed7b55cb36 persona_id=analyst query='Compare Residential vs SME segments' user_id=a3065e0b-d567-4a01-846c-f1008e82f824
+2026-09-16 08:18:18 [debug    ] Guardrail passed               query='Compare Residential vs SME segments'
+2026-09-16 08:18:24 [info     ] Conversation created           conversation_id=fe493f59-c649-4857-be58-b8ed7b55cb36 user_id=a3065e0b-d567-4a01-846c-f1008e82f824
+2026-09-16 08:18:26 [info     ] Agent starting                 agent=planner
+2026-09-16 08:18:27 [info     ] Agent complete                 agent=planner duration_ms=779
+2026-09-16 08:18:27 [info     ] Agent starting                 agent=metadata
+2026-09-16 08:18:27 [info     ] Using cached schema            dataset=KarthikRudrapati
+2026-09-16 08:18:27 [info     ] Agent complete                 agent=metadata duration_ms=0
+2026-09-16 08:18:27 [info     ] Agent starting                 agent=data
+2026-09-16 08:18:27 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:18:28 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:18:28 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:18:30 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:18:30 [info     ] Running BigQuery query         sql_preview='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter'
+2026-09-16 08:18:30 [info     ] BigQuery query complete        row_count=1
+2026-09-16 08:18:30 [info     ] Running BigQuery query         sql_preview="SELECT FORMAT_DATE('%Y-%m', DATE_TRUNC(`Reporting_Date_Filter`, MONTH)) AS label, MAX(`Subscriber_Count_CM`) AS value FR"
+2026-09-16 08:18:31 [error    ] BigQuery error                 error='400 SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]; reason: invalidQuery, location: query, message: SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]\n\nLocation: US\nJob ID: d04c9d34-25af-409e-8e6d-b859bc143c64\n' sql="SELECT FORMAT_DATE('%Y-%m', DATE_TRUNC(`Reporting_Date_Filter`, MONTH)) AS label, MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` GROUP BY DATE_TRUNC(`Reporting_Da"
+2026-09-16 08:18:31 [error    ] BigQuery query failed          error='400 SELECT list expression references column Reporting_Date_Filter which is neither grouped nor aggregated at [1:40]; reason: invalidQuery, location: query, mes' query_type=trend
+2026-09-16 08:18:31 [info     ] Data agent complete            chart_source=current_period current_rows=1 dimension_rows=1 trend_rows=0
+2026-09-16 08:18:31 [info     ] Agent complete                 agent=data duration_ms=4363
+2026-09-16 08:18:36 [info     ] Analytics complete             chart_type=grouped_bar kpis=3 persona=analyst
+2026-09-16 08:18:36 [info     ] GENERATED SQL                  row_count=1 sql='SELECT MAX(`Subscriber_Count_CM`) AS value FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp` WHERE `Reporting_Date_Filter` = (SELECT MAX(`Reporting_Date_Filter`) FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp`)'
+2026-09-16 08:18:36 [info     ] Request logged to BQ           log_id=0aa6ab9f-d539-4170-a2a5-d69f17d39486 query='Compare Residential vs SME segments'
+2026-09-16 08:18:36 [error    ] Market analysis parse error    error='models.schemas.MarketAnalysis() argument after ** must be a mapping, not list'
+2026-09-16 08:18:36 [error    ] Competitor analysis parse error error="'list' object has no attribute 'get'"
+2026-09-16 08:18:36 [info     ] Pipeline complete              bullets=3 duration_ms=10251 kpis=3 query='Compare Residential vs SME segments' questions=5
+INFO:     127.0.0.1:41696 - "POST /api/v1/chat HTTP/1.1" 200 OK
