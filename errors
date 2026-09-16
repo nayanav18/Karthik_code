@@ -29,3 +29,26 @@ INFO:     127.0.0.1:34798 - "POST /api/v1/chat HTTP/1.1" 200 OK
 2026-09-16 08:59:21 [error    ] Competitor analysis parse error error="'list' object has no attribute 'get'"
 2026-09-16 08:59:21 [info     ] Pipeline complete              bullets=3 duration_ms=12943 kpis=3 query='Show subscriber count for May 2026' questions=5
 INFO:     127.0.0.1:48234 - "POST /api/v1/chat HTTP/1.1" 200 OK
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT
+  Reporting_Date_Filter,
+  Subscriber_Count_CM,
+  Customer_Subscriber_Type_Description_Q,
+  Channel_Group
+FROM `vf-grp-gbissdbx-dev-1.KarthikRudrapati.cp`
+WHERE Reporting_Date_Filter >= DATE '2026-05-01'
+  AND Reporting_Date_Filter < DATE '2026-06-01'
+ORDER BY Reporting_Date_Filter
+LIMIT 100;
