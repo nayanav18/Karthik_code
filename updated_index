@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <meta
+      name="theme-color"
+      content="#050a12"
+    />
+
+    <meta
+      name="description"
+      content="Enterprise Analytics AI Platform"
+    />
+
+    <title>Analytics AI | Enterprise Analytics</title>
+
+    <style>
+      /* =========================================================
+         ANALYTICS AI
+         DARK VODAFONE-INSPIRED COLOR THEME
+         ========================================================= */
+
+      :root {
+        /* ---------------------------------------------------------
+           Main backgrounds
+           --------------------------------------------------------- */
+        --bg-main: #050a12;
+        --bg-sidebar: #071321;
+        --bg-header: #0b101c;
+        --bg-section: #0d1626;
+
+        --bg-card: #1b263c;
+        --bg-card-dark: #101a2d;
+        --bg-card-hover: #202d46;
+
+        /* ---------------------------------------------------------
+           Vodafone / Primary Colors
+           --------------------------------------------------------- */
+        --vodafone-red: #e60000;
+        --vodafone-red-bright: #ff0018;
+        --vodafone-red-dark: #8f0012;
+
+        --magenta: #d50072;
+        --purple: #9138da;
+
+        /* ---------------------------------------------------------
+           Semantic accent colors
+           --------------------------------------------------------- */
+        --cyan: #00d8ff;
+        --cyan-dark: #007f9e;
+
+        --green: #28e98c;
+        --green-dark: #0e8053;
+
+        --orange: #ff8a1f;
+        --orange-dark: #a74b0a;
+
+        --yellow: #ffbe45;
+
+        /* ---------------------------------------------------------
+           Text
+           --------------------------------------------------------- */
+        --text-primary: #ffffff;
+        --text-secondary: #8ba8d1;
+        --text-muted: #516c91;
+        --text-disabled: #344967;
+
+        /* ----------------------
