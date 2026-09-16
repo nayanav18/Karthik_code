@@ -1,0 +1,4 @@
+mkdir -p app
+touch app/__init__.py
+touch app/main.py
+touch requirements.txt
